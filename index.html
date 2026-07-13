@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>drewj.ai — the multi-agent prompt + the GPT-5.6 tier cheatsheet</title>
+<meta name="description" content="The exact prompt I used to split one to-do list across 4 parallel AI agents, plus a one-page cheatsheet so you don't overpay on the wrong GPT-5.6 tier. Free. No email wall.">
+<meta property="og:title" content="drewj.ai — the multi-agent prompt">
+<meta property="og:description" content="One to-do list. Four agents. Running at once. Free, no email wall.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#0F1419;
+    --bench:#151C24;
+    --rule:#2A3642;
+    --chalk:#E9EDF1;
+    --dim:#8697A6;
+    --sheet:#F2EFE7;
+    --sheet-ink:#1A1F26;
+    --sheet-dim:#5E6874;
+    --signal:#F5C518;
+    --loss:#E06A5B;
+    --f-disp:"Archivo","Helvetica Neue",Arial,sans-serif;
+    --f-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--void);color:var(--chalk);
+    font-family:var(--f-disp);font-size:17px;line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      linear-gradient(var(--bench) 1px,transparent 1px),
+      linear-gradient(90deg,var(--bench) 1px,transparent 1px);
+    background-size:56px 56px;
+    background-position:-1px -1px;
+  }
+  .wrap{max-width:900px;margin:0 auto;padding:0 24px}
+
+  /* ── masthead ───────────────────────────── */
+  header{padding:40px 0 0}
+  .bar{display:flex;justify-content:space-between;align-items:baseline;
+       border-bottom:2px solid var(--chalk);padding-bottom:12px;flex-wrap:wrap;gap:8px}
+  .logo{font-weight:800;font-size:20px;letter-spacing:-.02em}
+  .logo span{color:var(--signal)}
+  .stamp{font-family:var(--f-mono);font-size:11px;font-weight:700;letter-spacing:.14em;
+         text-transform:uppercase;color:var(--void);background:var(--signal);
+         padding:5px 10px;transform:rotate(-1.5deg);display:inline-block}
+
+  /* ── hero ───────────────────────────────── */
+  .hero{padding:64px 0 48px}
+  h1{font-size:clamp(38px,7vw,68px);font-weight:800;line-height:1.02;
+     letter-spacing:-.035em;text-transform:uppercase}
+  h1 em{font-style:normal;color:var(--signal)}
+  .sub{margin-top:20px;font-size:clamp(17px,2.2vw,21px);color:var(--dim);max-width:52ch}
+
+  /* ── the job ticket (signature) ─────────── */
+  .ticket{border:1px solid var(--rule);background:#11171E;margin-bottom:12px}
+  .ticket-head{display:flex;justify-content:space-between;align-items:center;
+    padding:12px 18px;border-bottom:1px solid var(--rule);
+    font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--dim)}
+  pre{font-family:var(--f-mono);font-size:13px;line-height:1.75;color:#C9D4DE;
+      padding:22px 18px;overflow-x:auto;white-space:pre;max-height:340px;overflow-y:auto}
+  pre::-webkit-scrollbar{width:8px;height:8px}
+  pre::-webkit-scrollbar-thumb{background:var(--rule)}
+
+  .copy{
+    width:100%;border:0;cursor:pointer;display:block;
+    background:var(--signal);color:var(--void);
+    font-family:var(--f-disp);font-weight:800;font-size:19px;
+    letter-spacing:.02em;text-transform:uppercase;padding:20px;
+    transition:filter .15s ease;
+  }
+  .copy:hover{filter:brightness(1.08)}
+  .copy:focus-visible{outline:3px solid var(--chalk);outline-offset:3px}
+  .copy[data-done="1"]{background:var(--chalk)}
+
+  /* the fan-out — the signature moment */
+  .lanes{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;
+         background:var(--rule);border:1px solid var(--rule);border-top:0}
+  .lane{background:#11171E;padding:14px 10px;text-align:center;
+        font-family:var(--f-mono);font-size:10px;font-weight:700;
+        letter-spacing:.12em;text-transform:uppercase;color:#4C5A68;
+        transition:background .2s ease,color .2s ease}
+  .lane.on{background:var(--signal);color:var(--void)}
+  .hint{margin-top:14px;font-family:var(--f-mono);font-size:12px;color:var(--dim);
+        min-height:1.6em}
+  .hint b{color:var(--signal)}
+
+  /* ── sections ───────────────────────────── */
+  section{padding:64px 0}
+  h2{font-size:clamp(26px,4vw,36px);font-weight:800;letter-spacing:-.025em;
+     text-transform:uppercase;margin-bottom:6px}
+  .eyebrow{font-family:var(--f-mono);font-size:11px;font-weight:700;letter-spacing:.16em;
+           text-transform:uppercase;color:var(--signal);margin-bottom:14px}
+  .lede{color:var(--dim);max-width:56ch;margin-bottom:28px}
+
+  /* ── the printed sheet ──────────────────── */
+  .sheet{background:var(--sheet);color:var(--sheet-ink);padding:32px;
+         box-shadow:0 18px 50px rgba(0,0,0,.45)}
+  .sheet h3{font-size:15px;font-weight:800;text-transform:uppercase;
+            letter-spacing:.05em;margin:26px 0 10px}
+  .sheet h3:first-child{margin-top:0}
+  .sheet p{color:var(--sheet-dim);margin-bottom:10px}
+  .sheet strong{color:var(--sheet-ink)}
+
+  table{width:100%;border-collapse:collapse;margin:14px 0 4px;font-size:14px}
+  th,td{text-align:left;padding:11px 10px;border-bottom:1px solid #D3CEC2;vertical-align:top}
+  th{font-family:var(--f-mono);font-size:10px;font-weight:700;letter-spacing:.1em;
+     text-transform:uppercase;color:var(--sheet-dim);border-bottom:2px solid var(--sheet-ink)}
+  td:first-child{font-weight:600}
+  .num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+  ol{margin:8px 0 0 20px;color:var(--sheet-dim)}
+  ol li{margin-bottom:10px}
+  ol li strong{color:var(--sheet-ink)}
+
+  /* ── scoreboard ─────────────────────────── */
+  .board{border:1px solid var(--rule)}
+  .row{display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:1px;background:var(--rule)}
+  .cell{background:#11171E;padding:16px 18px}
+  .row.head .cell{background:var(--bench);font-family:var(--f-mono);font-size:10px;
+    letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+  .cell .test{font-weight:600;font-size:15px}
+  .cell .who{font-family:var(--f-mono);font-size:11px;color:var(--dim);margin-top:3px}
+  .score{font-family:var(--f-mono);font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+  .score.lose{color:var(--loss)}
+  .score.win{color:var(--signal)}
+  .verdict{margin-top:24px;border-left:3px solid var(--signal);padding-left:18px;
+           font-size:clamp(19px,3vw,25px);font-weight:600;letter-spacing:-.01em}
+
+  /* ── footer ─────────────────────────────── */
+  footer{border-top:1px solid var(--rule);padding:36px 0 64px;color:var(--dim);font-size:15px}
+  footer a{color:var(--signal);text-decoration:none;border-bottom:1px solid transparent}
+  footer a:hover{border-bottom-color:var(--signal)}
+  .sig{font-weight:600;color:var(--chalk);margin-bottom:6px}
+
+  @media(max-width:640px){
+    .lanes{grid-template-columns:repeat(2,1fr)}
+    .row{grid-template-columns:1fr 1fr}
+    .row .cell:first-child{grid-column:1/-1;padding-bottom:6px}
+    .sheet{padding:22px 18px}
+    section{padding:48px 0}
+  }
+  @media(prefers-reduced-motion:reduce){
+    *{transition:none!important;animation:none!important}
+    html{scroll-behavior:auto}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<header>
+  <div class="bar">
+    <div class="logo">drewj<span>.ai</span></div>
+    <div class="stamp">Free · No email wall</div>
+  </div>
+</header>
+
+<div class="hero">
+  <h1>One to-do list.<br><em>Four agents.</em><br>Running at once.</h1>
+  <p class="sub">This is the exact prompt I hand ChatGPT to split a whole to-do list across four parallel agents. Copy it, paste it, put your own list in. It works today.</p>
+</div>
+
+<!-- ── SIGNATURE: the job ticket ───────────────────────────── -->
+<div class="ticket">
+  <div class="ticket-head">
+    <span>the-multi-agent-prompt.txt</span>
+    <span>Needs: ChatGPT Pro · Ultra ON</span>
+  </div>
+<pre id="prompt">You are my Work Manager. I'm handing you my entire to-do list.
+Do NOT do this as one chat. Split it into parallel sub-agents and run them at once.
+
+Spin up FOUR agents, each owning its lane:
+- RESEARCH  → facts, competitors, sources (use web access)
+- ANALYTICS → data, numbers, patterns, takeaways
+- STRATEGY  → plans, calendars, decks, positioning
+- CONTENT   → all writing: posts, captions, descriptions
+
+If there are more tasks than agents, some agents own two. That's fine — run all four in parallel.
+
+Rules for every agent:
+1. State which task you took and which agent you are before you start.
+2. Do the actual work — real deliverables, not a plan to do the work.
+3. Use web access for anything past your knowledge cutoff.
+4. Flag anything you're unsure about instead of guessing.
+5. End with "confidence: high / medium / low — why."
+
+When all four finish, give me one summary: what's done, what needs my eyes, what's next.
+
+CONTEXT:
+[Who you are. What you're working on. Who it's for. 2-3 sentences is plenty.]
+
+MY TO-DO LIST:
+
+1. [RESEARCH]  ...
+2. [ANALYTICS] ...
+3. [STRATEGY]  ...
+4. [STRATEGY]  ...
+5. [CONTENT]   ...
+6. [CONTENT]   ...
+
+Tag each task with the lane that should own it. Be specific about what "done"
+looks like — "find 10 competitors and rank them by X" beats "research competitors."</pre>
+  <button class="copy" id="copy">Copy the prompt</button>
+  <div class="lanes" id="lanes">
+    <div class="lane" data-i="0">Research</div>
+    <div class="lane" data-i="1">Analytics</div>
+    <div class="lane" data-i="2">Strategy</div>
+    <div class="lane" data-i="3">Content</div>
+  </div>
+</div>
+<p class="hint" id="hint">Six tasks. Four agents. One pass.</p>
+
+<!-- ── the cheatsheet ──────────────────────────────────────── -->
+<section id="cheatsheet">
+  <div class="eyebrow">The second free thing</div>
+  <h2>Which tier to run it on</h2>
+  <p class="lede">GPT-5.6 ships as three tiers at very different prices. Most people leave everything on the flagship and overpay for it.</p>
+
+  <div class="sheet">
+    <h3>Pick in five seconds</h3>
+    <p><strong>Running agents on real work</strong> — a to-do list, a project, anything multi-step → <strong>Sol.</strong> It's the only tier with Ultra mode, and Ultra is the only way to run agents in parallel at all.</p>
+    <p><strong>Chatting, writing, thinking out loud</strong> → <strong>Terra.</strong> Roughly last year's flagship quality at half of Sol's price. Don't pay Sol rates to draft an email.</p>
+    <p><strong>Bulk and simple</strong> — tagging, sorting, lookups → <strong>Luna.</strong> Cheapest and fastest. Save it for work that doesn't need to think hard.</p>
+
+    <h3>The table</h3>
+    <div class="tbl-scroll">
+    <table>
+      <thead>
+        <tr><th></th><th>Sol — flagship</th><th>Terra — balanced</th><th>Luna — fast</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Agents in parallel</td><td>Yes — Ultra mode</td><td>No</td><td>No</td></tr>
+        <tr><td>Hard reasoning</td><td>Best</td><td>Fine</td><td>Underpowered</td></tr>
+        <tr><td>Chat and writing</td><td>Overkill</td><td>Best value</td><td>Fine</td></tr>
+        <tr><td>Bulk work</td><td>Wasteful</td><td>Works</td><td>Cheapest</td></tr>
+        <tr><td>Price / 1M tokens</td><td class="num">$5 in · $30 out</td><td class="num">$2.50 in · $15 out</td><td class="num">$1 in · $6 out</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h3>Three rules that save you money</h3>
+    <ol>
+      <li><strong>Match the tier to the job, not to the day.</strong> Agents on Sol, chat on Terra, bulk on Luna — switch per task. Leaving everything on Sol is how most people overpay.</li>
+      <li><strong>Turn on web access.</strong> Knowledge stops at February 2026. Without the web it's blind to everything since, and it will still answer confidently.</li>
+      <li><strong>Judge it like a manager.</strong> It's a fast junior, not a finished employee. Budget one editing pass — a couple of tasks in six will need your eyes.</li>
+    </ol>
+
+    <h3>One warning nobody puts on the box</h3>
+    <p>Ultra burns your usage <strong>about four times faster</strong>, because it's four agents. On the $20 plan you will hit the wall fast. Ultra needs Pro.</p>
+  </div>
+</section>
+
+<!-- ── the honest scoreboard ───────────────────────────────── -->
+<section>
+  <div class="eyebrow">The part the launch videos skipped</div>
+  <h2>The honest scoreboard</h2>
+  <p class="lede">Everyone ran OpenAI's headline number. Here's what happens when someone else grades the test.</p>
+
+  <div class="board">
+    <div class="row head">
+      <div class="cell">Test</div><div class="cell">GPT-5.6</div><div class="cell">Claude</div>
+    </div>
+    <div class="row">
+      <div class="cell"><div class="test">Agents' Last Exam</div><div class="who">Run by OpenAI</div></div>
+      <div class="cell"><div class="score win">53.6</div></div>
+      <div class="cell"><div class="score">40.5</div></div>
+    </div>
+    <div class="row">
+      <div class="cell"><div class="test">Artificial Analysis Index</div><div class="who">Independent</div></div>
+      <div class="cell"><div class="score lose">59</div></div>
+      <div class="cell"><div class="score">60</div></div>
+    </div>
+    <div class="row">
+      <div class="cell"><div class="test">SWE-Bench Pro</div><div class="who">Independent</div></div>
+      <div class="cell"><div class="score lose">64.6%</div></div>
+      <div class="cell"><div class="score">80%</div></div>
+    </div>
+    <div class="row">
+      <div class="cell"><div class="test">Cost per task</div><div class="who">What you actually pay</div></div>
+      <div class="cell"><div class="score win">~$1</div></div>
+      <div class="cell"><div class="score">~$3</div></div>
+    </div>
+  </div>
+
+  <p class="verdict">It wins the test its own maker wrote. It loses both of the ones nobody paid for — by a single point on one of them — and it charges a third of the price. It's not the genius. It's the workhorse. When you're handing off a to-do list, the workhorse is the one you want.</p>
+</section>
+
+<footer>
+  <p class="sig">Drew Johnstun — just a guy who actually runs this stuff.</p>
+  <p>I test every model the day it drops, run it on my own real work, and tell you what held up and what fell apart. <a href="https://youtube.com/@drewjohnstun">The videos are here.</a></p>
+</footer>
+
+</div>
+
+<script>
+(function(){
+  var btn   = document.getElementById('copy');
+  var pre   = document.getElementById('prompt');
+  var hint  = document.getElementById('hint');
+  var lanes = Array.prototype.slice.call(document.querySelectorAll('.lane'));
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function settled(){
+    btn.textContent = 'Copied — now paste it into ChatGPT';
+    btn.dataset.done = '1';
+    hint.innerHTML = 'Turn <b>Ultra</b> on first, or it runs as one agent instead of four.';
+  }
+
+  function fanOut(){
+    if (reduce){ lanes.forEach(function(l){ l.classList.add('on'); }); settled(); return; }
+    lanes.forEach(function(l){ l.classList.remove('on'); });
+    lanes.forEach(function(lane, i){
+      setTimeout(function(){ lane.classList.add('on'); }, 90 * i);
+    });
+    setTimeout(settled, 90 * lanes.length + 120);
+  }
+
+  btn.addEventListener('click', async function(){
+    var text = pre.textContent;
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (e) {
+      var r = document.createRange(); r.selectNodeContents(pre);
+      var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      try { document.execCommand('copy'); s.removeAllRanges(); }
+      catch (e2) {
+        btn.textContent = 'Press ⌘C — the prompt is selected';
+        hint.textContent = 'Your browser blocked the clipboard. Select all and copy.';
+        return;
+      }
+    }
+    fanOut();
+  });
+})();
+</script>
+</body>
+</html>
