@@ -62,8 +62,12 @@
     padding:12px 18px;border-bottom:1px solid var(--rule);
     font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;
     text-transform:uppercase;color:var(--dim)}
+  .ticket-body{position:relative}
+  .ticket-body::after{content:"";position:absolute;left:0;right:0;bottom:0;height:56px;
+    background:linear-gradient(transparent,#11171E);pointer-events:none}
   pre{font-family:var(--f-mono);font-size:13px;line-height:1.75;color:#C9D4DE;
-      padding:22px 18px;overflow-x:auto;white-space:pre;max-height:340px;overflow-y:auto}
+      padding:22px 18px;overflow:auto;white-space:pre;max-height:240px;
+      overscroll-behavior:auto}
   pre::-webkit-scrollbar{width:8px;height:8px}
   pre::-webkit-scrollbar-thumb{background:var(--rule)}
 
@@ -174,6 +178,7 @@
     <span>the-multi-agent-prompt.txt</span>
     <span>Needs: ChatGPT Pro · Ultra ON</span>
   </div>
+<div class="ticket-body">
 <pre id="prompt">You are my Work Manager. I'm handing you my entire to-do list.
 Do NOT do this as one chat. Split it into parallel sub-agents and run them at once.
 
@@ -208,6 +213,7 @@ MY TO-DO LIST:
 
 Tag each task with the lane that should own it. Be specific about what "done"
 looks like — "find 10 competitors and rank them by X" beats "research competitors."</pre>
+</div>
   <button class="copy" id="copy">Copy the prompt</button>
   <div class="lanes" id="lanes">
     <div class="lane" data-i="0">Research</div>
